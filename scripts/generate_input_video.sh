@@ -19,7 +19,7 @@ TARGET_AUDIO=../test.wav
 GENERATE_DEFAULT_REF=false
 DEFAULT_VIDEO_REF=../test-no-padding.yuv
 DEFAULT_AUDIO_REF=../test-no-padding.wav
-FONT=/usr/share/fonts/truetype/msttcorefonts/Arial.ttf
+FONT=/System/Library/Fonts/Supplemental/Arial.ttf
 CLEANUP=true
 USAGE="Usage: `basename $0` [-d=duration] [-p=padding_duration_sec] [--game] [--generate_default_ref] [--no_cleanup] [--clean]"
 

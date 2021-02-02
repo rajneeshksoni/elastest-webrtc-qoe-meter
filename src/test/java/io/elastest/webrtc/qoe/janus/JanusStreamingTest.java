@@ -29,6 +29,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 
@@ -37,38 +38,30 @@ import io.github.bonigarcia.seljup.Arguments;
 import io.github.bonigarcia.seljup.SeleniumExtension;
 
 @ExtendWith(SeleniumExtension.class)
-public class JanusConferenceTest extends ElasTestRemoteControlParent {
+public class JanusStreamingTest extends ElasTestRemoteControlParent {
 
     final Logger log = getLogger(lookup().lookupClass());
 
-    static final String SUT_URL = "https://janus.conf.meetecho.com/videoroomtest.html";
-    static final int TEST_TIME_SEC = 5;
+    static final String SUT_URL = "https://janus.conf.meetecho.com/streamingtest.html";
+    static final int TEST_TIME_SEC = 15;
     static final String PRESENTER_NAME = "presenter";
     static final String VIEWER_NAME = "viewer";
 
     ChromeDriver presenter;
     ChromeDriver viewer;
 
-    public JanusConferenceTest(
-            @Arguments({ FAKE_DEVICE,FAKE_UI, FAKE_VIDEO, FAKE_AUDIO, DISABLE_SECURITY,SANDBIX_FLAG }) ChromeDriver presenter,
-            @Arguments({ FAKE_DEVICE,FAKE_UI, FAKE_VIDEO, FAKE_AUDIO, DISABLE_SECURITY,SANDBIX_FLAG }) ChromeDriver viewer) {
-        super(SUT_URL, presenter, viewer);
-        this.presenter = presenter;
+    public JanusStreamingTest(
+            @Arguments({ FAKE_DEVICE, FAKE_VIDEO, FAKE_AUDIO }) ChromeDriver viewer) {
+        super(SUT_URL, viewer);
         this.viewer = viewer;
     }
 
     @Test
     void janusTest() throws Exception {
-        // Presenter
-        startPeer(presenter, PRESENTER_NAME);
-
         // Viewer
         startPeer(viewer, VIEWER_NAME);
 
         String pc = "peerConnections[0]";
-        waitForJsObject(presenter, pc);
-        Object presenterPc = executeScript(presenter, "return " + pc + ";");
-        log.info("presenter pc {}", presenterPc);
 
         waitForJsObject(viewer, pc);
         Object viewerPc = executeScript(viewer, "return " + pc + ";");
@@ -81,29 +74,27 @@ public class JanusConferenceTest extends ElasTestRemoteControlParent {
                     executeScript(viewer, "return peerConnections.length;")
                             .toString());
             log.info("Number of peerConnections: {}", num);
-        } while (num < 2);
+        } while (num < 1);
 
-        startRecording(presenter, "peerConnections[0].getLocalStreams()[0]");
         startRecording(viewer,
                 "peerConnections[" + (num - 1) + "].getRemoteStreams()[0]");
 
         waitSeconds(TEST_TIME_SEC);
-        stopRecording(presenter);
         stopRecording(viewer);
 
-        File presenterRecording = getRecording(presenter);
-        assertTrue(presenterRecording.exists());
         File viewerRecording = getRecording(viewer);
+        log.error(" output filename = " + viewerRecording.getCanonicalPath());
         assertTrue(viewerRecording.exists());
     }
 
     private void startPeer(WebDriver driver, String name) {
         driver.findElement(By.id("start")).click();
-        WebDriverWait wait = new WebDriverWait(presenter, 5);
-        WebElement username = driver.findElement(By.id("username"));
-        wait.until(ExpectedConditions.visibilityOf(username));
-        username.sendKeys(name);
-        driver.findElement(By.id("register")).click();
+        WebDriverWait wait = new WebDriverWait(viewer, 5);
+        WebElement streamset = driver.findElement(By.id("streamset"));
+        wait.until(ExpectedConditions.visibilityOf(streamset));
+        streamset.click();
+        driver.findElement(By.linkText("Opus/VP8 live stream (sent by a gstreamer script) (live)")).click();
+        driver.findElement(By.id("watch")).click();
     }
 
 }
