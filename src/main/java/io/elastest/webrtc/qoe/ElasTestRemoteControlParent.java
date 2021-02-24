@@ -63,6 +63,7 @@ public class ElasTestRemoteControlParent {
     public static final String DISABLE_SMOOTHNESS = "--disable-rtc-smoothness-algorithm";
     public static final String DISABLE_SECURITY = "--disable-web-security";
     public static final String SANDBIX_FLAG = "--no-sandbox";
+    public static final String RECORDING_FILE_PATH = "/tmp/";
 
     static final String REMOTE_CONTROL_JS_OBJECT = "elasTestRemoteControl";
     static final int POLL_TIME_MS = 500;
@@ -203,7 +204,8 @@ public class ElasTestRemoteControlParent {
     }
 
     public File getRecording(WebDriver driver) throws IOException {
-        File tmpFile = createTempFile(valueOf(nanoTime()), ".webm");
+        String fileName = RECORDING_FILE_PATH + "/streaming" + valueOf(nanoTime()) + ".webm";
+        File tmpFile = new File(fileName);
         return getRecording(driver, tmpFile.getAbsolutePath());
     }
 
@@ -272,24 +274,24 @@ public class ElasTestRemoteControlParent {
         userName.sendKeys(keys);
     }
 
-    public void execCommandInContainer(SeleniumExtension seleniumExtension,
-            WebDriver driver, String[] command)
-            throws DockerException, InterruptedException {
-        Optional<String> containerId = seleniumExtension.getContainerId(driver);
-        if (containerId.isPresent()) {
-            String container = containerId.get();
-            log.debug("Running {} in container {}", Arrays.toString(command),
-                    container);
-
-            String result = seleniumExtension.getDockerService()
-                    .execCommandInContainer(container, command);
-            if (result != null) {
-                log.debug("Result: {}", result);
-            }
-        } else {
-            log.warn("Container not present in {}", driver);
-        }
-    }
+//    public void execCommandInContainer(SeleniumExtension seleniumExtension,
+//            WebDriver driver, String[] command)
+//            throws DockerException, InterruptedException {
+//        Optional<String> containerId = seleniumExtension.getContainerId(driver);
+//        if (containerId.isPresent()) {
+//            String container = containerId.get();
+//            log.debug("Running {} in container {}", Arrays.toString(command),
+//                    container);
+//
+//            String result = seleniumExtension.getDockerService()
+//                    .execCommandInContainer(container, command);
+//            if (result != null) {
+//                log.debug("Result: {}", result);
+//            }
+//        } else {
+//            log.warn("Container not present in {}", driver);
+//        }
+//    }
 
     // Simulate network conditions using NetEm
     public void simulateNetwork(SeleniumExtension seleniumExtension,
@@ -314,7 +316,7 @@ public class ElasTestRemoteControlParent {
             break;
         }
 
-        execCommandInContainer(seleniumExtension, driver, tcCommand);
+//        execCommandInContainer(seleniumExtension, driver, tcCommand);
     }
 
     // Reset network using NetEm
@@ -336,7 +338,7 @@ public class ElasTestRemoteControlParent {
             break;
         }
 
-        execCommandInContainer(seleniumExtension, driver, tcCommand);
+//        execCommandInContainer(seleniumExtension, driver, tcCommand);
     }
 
     // Monkey patching of getUserMedia to force using video and audio
